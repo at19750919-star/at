@@ -1,0 +1,2 @@
+api/*.py linguist-detectable=false
+waa.py linguist-detectable=false
