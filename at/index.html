@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WAA 介面</title>
+<style>
+:root{--bg:#0e1117;--panel:#151a22;--soft:#1b2332;--muted:#9fb0c3;--text:#e6eef8;--brand:#5b9cff;--ok:#4ad395;--warn:#ffb65b;--bad:#ff6b7a;--ring:#2a82ff55;--card-r:18px;--gap:16px;--shadow:0 10px 24px rgba(0,0,0,.45)}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#0e1117;color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial}
+.container{max-width:100vw;margin:0 auto;padding:0}
+.header{position:sticky;top:0;background:#0e1117d9;backdrop-filter:blur(8px);border-bottom:1px solid #ffffff0f;z-index:50}
+.header .container{display:flex;gap:10px;align-items:center;padding:12px 16px}
+.brand{font-weight:700;letter-spacing:.3px}
+.badge{font-size:12px;padding:2px 8px;border-radius:999px;background:#1d2736;border:1px solid #2d3b50;color:#cfe0ff}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px}
+@media (max-width:1200px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:780px){.grid{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid #ffffff12;border-radius:var(--card-r);box-shadow:var(--shadow)}
+.card h3{margin:0 0 8px;font-size:16px}
+.card .head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #ffffff12;background:linear-gradient(180deg,#171e2a,#151a22)}
+.card .body{padding:14px 16px}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+label{font-size:12px;color:var(--muted)}
+.input{display:flex;flex-direction:column;gap:6px}
+input[type=number],select{height:36px;border-radius:10px;border:1px solid #2a3342;background:#0f1520;color:var(--text);padding:0 10px;outline:none}
+button{height:36px;padding:0 14px;border-radius:10px;border:1px solid #2a3342;background:#133b6b;color:#e7f1ff;cursor:pointer}
+button.primary{background:linear-gradient(180deg,#3278ff,#2a66df);border-color:#235bd3}
+button:disabled{opacity:.6;cursor:not-allowed}
+.table-wrap{border:1px solid #ffffff12;border-radius:14px;overflow:auto;background:#0e1420}
+.table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.table th,.table td{border-bottom:1px solid #ffffff12;padding:6px 8px;text-align:center;white-space:nowrap}
+.table th{position:sticky;top:0;background:#101624;z-index:1}
+.win-bank{color:#ff7d7d}.win-player{color:#7ddfff}.win-tie{color:#ffd773}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,"Ubuntu Mono",Consolas,monospace}
+.grid-preview{display:grid;grid-template-columns:repeat(21,1fr);gap:0;border:1px solid #ffffff12;border-radius:12px;overflow:hidden}
+.cell{display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;background:#0f1a28;border:1px solid #ffffff0d}
+.cell.red{color:#ff5a6d}.cell.black{color:#d8e6ff}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.stat{background:var(--soft);border:1px solid #ffffff14;border-radius:12px;padding:10px;text-align:center}
+.toast{position:fixed;right:18px;bottom:18px;padding:10px 12px;border-radius:10px;background:#18263a;border:1px solid #2c4260;box-shadow:var(--shadow);display:none}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #2a3342;border-top-color:#5b9cff;border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.small{font-size:12px;color:var(--muted)}
+.modal{position:fixed;inset:0;background:#0c111b;display:none;z-index:1000}
+.modal.show{display:block}
+.modal .toolbar{position:sticky;top:0;display:flex;justify-content:center;padding:12px;background:#0c111b;border-bottom:1px solid #ffffff12}
+.modal .board{padding:12px}
+.modal .grid-preview{grid-template-columns:repeat(21,1fr)}
+@media print{header,.grid,#toast{display:none}.modal{display:block}.modal .toolbar{display:none}.modal .board{padding:0}}
+</style>
+</head>
+<body>
+<header class="header">
+  <div class="container">
+    <div class="brand">WAA</div>
+    <span class="badge">本地測試</span>
+  </div>
+</header>
+<main class="container">
+  <div class="grid">
+    <!-- 區塊1：核心 -->
+    <section class="card" id="card-gen">
+      <div class="head"><h3>核心</h3><div class="small">設定並創建</div></div>
+      <div class="body">
+        <div class="actions">
+          <div class="input"><label>牌靴數</label><input id="numShoes" type="number" min="1" max="8" value="1"></div>
+          <div class="input"><label>訊號花色</label>
+            <select id="signalSuit">
+              <option value="S">黑桃 (S)</option>
+              <option value="H">紅心 (H)</option>
+              <option value="D">方塊 (D)</option>
+              <option value="C">梅花 (C)</option>
+            </select>
+          </div>
+          <div class="input"><label>和局訊號花色</label>
+            <select id="tieSuit">
+              <option value="S">黑桃 (S)</option>
+              <option value="H">紅心 (H)</option>
+              <option value="D">方塊 (D)</option>
+              <option value="C">梅花 (C)</option>
+            </select>
+          </div>
+          <button class="primary" id="btnGen"><span id="spinGen" style="display:none" class="spinner"></span> 創建牌靴</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊2：模擬 -->
+    <section class="card" id="card-sim">
+      <div class="head"><h3>模擬</h3><div class="small">切牌與掃描</div></div>
+      <div class="body">
+        <div class="actions">
+          <div class="input"><label>切去幾張</label><input id="cutPos" type="number" min="0" value="0"></div>
+          <div class="input"><label>莊家點數</label><input id="bankerPoint" type="number" min="0" max="9" value="9"></div>
+          <div class="input"><label>閒家點數</label><input id="playerPoint" type="number" min="0" max="9" value="9"></div>
+          <div class="input"><label>該局已用張數</label><input id="usedCards" type="number" min="2" max="6" value="4"></div>
+          <button id="btnCut"><span id="spinCut" style="display:none" class="spinner"></span> 切牌</button>
+          <button id="btnScan">掃描</button>
+          <span class="small" id="scanInfo"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- 區塊3：統計與導出 -->
+    <section class="card" id="card-stats">
+      <div class="head"><h3>統計與導出</h3><div class="small">花色統計 / 合併導出 / 大螢幕預覽</div></div>
+      <div class="body">
+        <div class="stats" id="suits"></div>
+        <div class="actions" style="margin-top:10px">
+          <button class="primary" id="btnExportCombined">導出</button>
+          <button id="btnPreview">預覽</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 兩個表區：左細、右預覽 -->
+  <div class="grid" id="tables" style="grid-template-columns:1fr 1fr;display:none">
+    <section class="card" style="margin:0">
+      <div class="head"><h3>詳細表格</h3><div class="small">生成後顯示結果</div></div>
+      <div class="body">
+        <div class="table-wrap" style="max-height:72vh">
+          <table class="table" id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+        </div>
+      </div>
+    </section>
+    <section class="card" style="margin:0">
+      <div class="head"><h3>預覽與列印</h3><div class="small">右表為預覽</div></div>
+      <div class="body">
+        <div id="gridPreview" class="grid-preview"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 大螢幕預覽 Modal -->
+  <div class="modal" id="previewModal">
+    <div class="toolbar"><button class="primary" id="btnPrint">列印</button></div>
+    <div class="board"><div id="modalGrid" class="grid-preview"></div></div>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+<script>
+const API_BASE = location.origin;
+let STATE = { rounds:[], vertical:"", suit_counts:{}, preview_grid:[] };
+const el = id=>document.getElementById(id);
+const toast=(msg)=>{const t=el('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2200)};
+const csvDownloadHref=(p)=>`${API_BASE}/api/export/${p}`;
+
+// 花色統計
+function renderSuits(data){
+  const suitsEl = el('suits');
+  if(!data||!Object.keys(data).length){suitsEl.innerHTML='<div class="small">尚無資料</div>';return}
+  const m = {S:'黑桃', H:'紅心', D:'方塊', C:'梅花'};
+  suitsEl.innerHTML = Object.entries(data).map(([k,v])=>`<div class="stat"><div class="small">${m[k]||k}</div><div style="font-size:22px;font-weight:700">${v}</div></div>`).join("");
+}
+
+// 左表：固定表頭
+function ensureHeader(){
+  const cols=["局號","1","2","3","4","5","6","勝方","閒家牌","莊家牌","閒家點數","莊家點數","顏色序列"];
+  el('thead').innerHTML = `<tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>`;
+}
+function renderRounds(rounds){
+  if(!rounds||!rounds.length){el('tbody').innerHTML='';return}
+  ensureHeader();
+  const rows = rounds.map((r,idx)=>{
+    const cards = [0,1,2,3,4,5].map(i=> (r.cards||[])[i]?.label || (r.cards||[])[i] || '');
+    const win = r.result||r.winner||'';
+    const winMap = {Banker:'win-bank','莊':'win-bank','B':'win-bank',Player:'win-player','閒':'win-player','P':'win-player',Tie:'win-tie','和':'win-tie','T':'win-tie'};
+    const winCls = winMap[win]||'';
+    return `<tr>
+      <td>${idx+1}</td>
+      ${cards.map(x=>`<td class="mono">${x||''}</td>`).join('')}
+      <td class="${winCls}">${win}</td>
+      <td class="mono">${(r.player_cards||r.player||[]).join('/')}</td>
+      <td class="mono">${(r.banker_cards||r.banker||[]).join('/')}</td>
+      <td>${r.player_point??''}</td>
+      <td>${r.banker_point??''}</td>
+      <td class="mono">${r.color_seq||r.colors||''}</td>
+    </tr>`
+  }).join('');
+  el('tbody').innerHTML = rows;
+}
+
+// 右表：由 rounds 建立，數字=較大點數；背景=紅黑佔比
+function buildPreviewFromRounds(rounds){
+  const signal = el('signalSuit').value;
+  const rows=[]; let row=[]; const W=21;
+  for(const r of rounds){
+    const p=r.player_point??0, b=r.banker_point??0; const val=(p>b?p:b);
+    const cards=(r.cards||[]);
+    const hasSignal = cards.some(c=>{const s=c?.suit||(c?.label?c.label.slice(-1):String(c).slice(-1));return s===signal});
+    const seq=(r.color_seq||'');
+    const rCount=(seq.match(/R/g)||[]).length; const bCount=(seq.match(/B/g)||[]).length;
+    const bg = rCount>=bCount? 'red':'gray';
+    row.push({val, signal:hasSignal, bg});
+    if(row.length===W){rows.push(row);row=[]}
+  }
+  if(row.length) rows.push(row);
+  return rows;
+}
+function renderPreview(grid){
+  const g = el('gridPreview');
+  if(!grid||!grid.length){g.innerHTML='<div class="small">尚無資料</div>';return}
+  g.innerHTML = grid.map(row=>row.map(cell=>{
+    const cls = cell.signal ? 'red' : 'black';
+    const bg = cell.bg==='red' ? 'style="background:#2a1216"' : 'style="background:#131a1a"';
+    return `<div class="cell ${cls}" ${bg}>${cell.val}</div>`
+  }).join('')).join('');
+}
+
+function applyStateGenerate(payload){
+  STATE.rounds = payload.rounds||[];
+  STATE.vertical = payload.vertical||'';
+  STATE.suit_counts = payload.suit_counts||{};
+  STATE.preview_grid = buildPreviewFromRounds(STATE.rounds);
+  renderSuits(STATE.suit_counts);
+  renderRounds(STATE.rounds);
+  renderPreview(STATE.preview_grid);
+  el('tables').style.display='grid';
+}
+
+// 生成
+el('btnGen').onclick=async()=>{
+  el('btnGen').disabled=true; el('spinGen').style.display='inline-block';
+  try{
+    const body={num_shoes:Number(el('numShoes').value),signal_suit:el('signalSuit').value,tie_signal_suit:el('tieSuit').value};
+    const res=await fetch(`${API_BASE}/api/generate_shoe`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const data=await res.json();
+    if(data.error){toast('生成失敗：'+data.error);return}
+    applyStateGenerate(data);
+    toast('已完成');
+  }catch(e){console.error(e);toast('發生錯誤')}
+  finally{el('btnGen').disabled=false; el('spinGen').style.display='none'}
+};
+
+// 切牌：只更新左表與統計
+el('btnCut').onclick=async()=>{
+  if(!STATE.rounds.length){toast('請先生成');return}
+  el('btnCut').disabled=true; el('spinCut').style.display='inline-block';
+  try{
+    const res=await fetch(`${API_BASE}/api/simulate_cut`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({cut_pos:Number(el('cutPos').value)})});
+    const data=await res.json();
+    if(data.error){toast('切牌失敗：'+data.error);return}
+    STATE.rounds = data.rounds||[];
+    STATE.suit_counts = data.suit_counts||{};
+    renderRounds(STATE.rounds);
+    renderSuits(STATE.suit_counts);
+    toast('已完成');
+  }catch(e){console.error(e);toast('發生錯誤')}
+  finally{el('btnCut').disabled=false; el('spinCut').style.display='none'}
+};
+
+// 掃描
+el('btnScan').onclick=async()=>{
+  if(!STATE.rounds.length){toast('請先生成');return}
+  try{
+    const payload={banker_point:Number(el('bankerPoint').value),player_point:Number(el('playerPoint').value),used_cards:Number(el('usedCards').value)};
+    const res=await fetch(`${API_BASE}/api/scan`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+    const data=await res.json();
+    el('scanInfo').textContent = `命中 ${data.count||0} 局`;
+  }catch(e){console.error(e);toast('發生錯誤')}
+};
+
+// 合併導出
+async function fetchText(url){ const r=await fetch(url); if(!r.ok) throw new Error('fetch failed'); return r.text(); }
+function downloadFile(name,content,type='text/csv'){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([content],{type})); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),1000); }
+function normalizeLines(txt){ return txt.replace(/\r\n/g,'\n').replace(/\r/g,'\n'); }
+function csvEscape(s){ if(s==null) return ''; const t=String(s); return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t }
+function parseCSV(txt){
+  const s = normalizeLines(txt);
+  const out=[]; let row=[], field='', i=0, inQ=false;
+  while(i<s.length){ const ch=s[i];
+    if(inQ){ if(ch==='"'){ if(s[i+1]==='"'){ field+='"'; i++; } else { inQ=false; } }
+             else { field+=ch; } }
+    else{
+      if(ch==='"'){ inQ=true; }
+      else if(ch===','){ row.push(field); field=''; }
+      else if(ch==='\n'){ row.push(field); out.push(row); row=[]; field=''; }
+      else { field+=ch; }
+    }
+    i++;
+  }
+  if(field.length>0||row.length>0){ row.push(field); out.push(row); }
+  return out;
+}
+function linesFromCSVorTxt(txt){
+  const norm = normalizeLines(txt).trim();
+  const rows = norm.split('\n').filter(Boolean);
+  return rows;
+}
+
+el('btnExportCombined').onclick=async()=>{
+  try{
+    const [verticalTxt, hitsCsv] = await Promise.all([
+      fetchText(csvDownloadHref('vertical')),
+      fetchText(csvDownloadHref('cut_hits.csv'))
+    ]);
+    // 直立一列
+    const vertical = linesFromCSVorTxt(verticalTxt);
+    // 命中統計多列
+    const hitRows = parseCSV(hitsCsv);
+    const header1 = hitRows[0] || [];
+    const header2 = hitRows[1] || [];
+    const dataRows = hitRows.slice(2);
+    if(dataRows.length !== vertical.length){ toast(`行數不一致：統計 ${dataRows.length} vs 直立 ${vertical.length}`); return }
+    if(header2.length){ header2.push('直立'); header1.push(''); }
+    const merged = [header1, header2, ...dataRows.map((row,i)=>[...row, vertical[i]])];
+    const csv = merged.map(cols=>cols.map(s=>csvEscape(s)).join(',')).join('\r\n');
+    downloadFile('combined_hits_vertical.csv', csv);
+    toast('已完成');
+  }catch(e){ console.error(e); toast('匯入來源檔案錯誤') }
+};
+
+// 大螢幕預覽 + 列印
+const modal=el('previewModal');
+el('btnPreview').onclick=()=>{
+  const grid=el('modalGrid');
+  grid.innerHTML = STATE.preview_grid.map(row=>row.map(cell=>{
+    const cls = cell.signal ? 'red' : 'black';
+    const bg = cell.bg==='red' ? 'style="background:#2a1216"' : 'style="background:#131a1a"';
+    return `<div class="cell ${cls}" ${bg}>${cell.val}</div>`
+  }).join('')).join('');
+  modal.classList.add('show');
+};
+modal.addEventListener('click',e=>{ if(e.target===modal) modal.classList.remove('show') });
+el('btnPrint').onclick=()=>{ window.print() };
+
+// 自測：解析函式基本用例
+(function selfTest(){
+  const a = 'A\nB\nC\n';
+  const b = 'x,y\n1,2\n3,4\n';
+  const L1 = linesFromCSVorTxt(a);
+  const L2 = linesFromCSVorTxt(b);
+  const ok = (L1.length===3 && L1[1]==='B' && L2[0]==='x' && L2[2]==='3');
+  if(!ok){ console.error('linesFromCSVorTxt 自測失敗', {L1,L2}); toast('自測失敗：請檢查解析'); }
+})();
+</script>
+</body>
+</html>
+
