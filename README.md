@@ -1,6 +1,6 @@
----
+﻿---
 title: WAA
-emoji: ??
+emoji: "😄"
 colorFrom: indigo
 colorTo: blue
 sdk: docker
