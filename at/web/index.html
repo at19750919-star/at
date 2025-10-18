@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>WAA 介面</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="container"></div>
+  </header>
+  <main class="container">
+    <div class="grid grid-top">
+      <!-- 核心：產生牌靴 -->
+      <section class="card" id="card-gen">
+        <div class="head"><h3>核心</h3><div class="small">設定並創建</div></div>
+        <div class="body">
+            <div class="actions">
+              <div class="input"><label>靴數</label><input id="numShoes" type="number" min="1" max="8" value="1"></div>
+              <div class="input"><label>訊號色</label>
+                <select id="signalSuit">
+                  <option value="H" selected>紅心 (H)</option>
+                  <option value="S">黑桃 (S)</option>
+                <option value="D">方塊 (D)</option>
+                <option value="C">梅花 (C)</option>
+              </select>
+            </div>
+            <div class="input"><label>和局訊號色</label>
+              <select id="tieSuit">
+                <option value="" selected>關閉</option>
+                <option value="H">紅心 (H)</option>
+                <option value="S">黑桃 (S)</option>
+                <option value="D">方塊 (D)</option>
+                <option value="C">梅花 (C)</option>
+              </select>
+            </div>
+            <button class="primary" id="btnGen"><span id="spinGen" style="display:none" class="spinner"></span> 創建牌靴</button>
+          </div>
+          <div class="small" id="genInfo" style="margin-top:8px;color:#9fb0c3"></div>
+        </div>
+      </section>
+
+      <!-- 模擬：切牌與掃描 -->
+      <section class="card" id="card-sim">
+        <div class="head"><h3>模擬</h3><div class="small">切牌與掃描</div></div>
+        <div class="body">
+            <div class="actions">
+              <div class="input"><label>切去張</label><input id="cutPos" type="number" min="0" value="0"></div>
+              <div class="input"><label>莊家點</label><input id="bankerPoint" type="number" min="0" max="9" value="0"></div>
+              <div class="input"><label>閒家點</label><input id="playerPoint" type="number" min="0" max="9" value="0"></div>
+              <div class="input"><label>已用張</label><input id="usedCards" type="number" min="0" max="6" value="0"></div>
+              <button id="btnCut"><span id="spinCut" style="display:none" class="spinner"></span> 切牌</button>
+            <button id="btnScan">掃描</button>
+            <span class="small" id="scanInfo"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 統計與導出 -->
+      <section class="card" id="card-stats">
+        <div class="head"><h3>統計與導出</h3><div class="small">花色統計 / 合併導出 / 大螢幕預覽</div></div>
+        <div class="body">
+          <div class="stats" id="suits"></div>
+          <div class="cut-summary" id="cutSummary"></div>
+          <div class="actions">
+            <button class="primary" id="btnExportCombined">導出</button>
+            <button id="btnPreview">預覽</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 左右兩表：左細、右預覽 -->
+    <div class="grid" id="tables" style="grid-template-columns:1fr 1fr;display:none">
+      <section class="card" style="margin:0">
+        <div class="head"><h3>詳細表格</h3><div class="small">生成後顯示結果</div></div>
+        <div class="body">
+          <div class="table-wrap" style="max-height:72vh">
+            <table class="table" id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
+          </div>
+        </div>
+      </section>
+      <section class="card" style="margin:0">
+        <div class="head"><h3>預覽與列印</h3><div class="small">右表為預覽</div></div>
+        <div class="body">
+          <div id="gridPreview" class="grid-preview"></div>
+        </div>
+      </section>
+    </div>
+
+    <!-- 大螢幕預覽 Modal -->
+    <div class="modal" id="previewModal">
+      <div class="toolbar">
+        <button id="btnClosePreview">返回</button>
+        <button class="primary" id="btnPrint">列印</button>
+      </div>
+      <div class="board"><div id="modalGrid" class="grid-preview"></div></div>
+    </div>
+  </main>
+  <div class="toast" id="toast"></div>
+  <script src="script.js"></script>
+</body>
+</html>
