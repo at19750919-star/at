@@ -22,10 +22,10 @@ const SIGNAL_SUIT_COLOR = {
 };
 
 const SUIT_DISPLAY_NAME = {
-  S: '\u9ed1\u6843',
-  H: '\u7d05\u5fc3',
-  D: '\u65b9\u584a',
-  C: '\u6885\u82b1',
+  S: '♠',
+  H: '♥',
+  D: '♦',
+  C: '♣',
 };
 
 const $ = (id) => document.getElementById(id);
@@ -133,7 +133,7 @@ function renderCutSummary(summary) {
 }
 
 function ensureRoundsHeader() {
-  const headers = ['\u5c40\u865f', '1', '2', '3', '4', '5', '6', 'S_idx', '\u52dd\u65b9', '\u9592\u5bb6\u724c', '\u838a\u5bb6\u724c', '\u9592\u5bb6\u9ede\u6578', '\u838a\u5bb6\u9ede\u6578', '\u984f\u8272\u5e8f\u5217'];
+  const headers = ['局號', '1', '2', '3', '4', '5', '6', '結果', '訊號', '\u9592\u5bb6\u724c', '\u838a\u5bb6\u724c', '閒家', '莊家', '卡牌'];
   $('thead').innerHTML = `<tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr>`;
 }
 
@@ -146,6 +146,14 @@ function renderRounds(rounds) {
   }
   ensureRoundsHeader();
   const signal = $('signalSuit').value;
+  // 花色顏色對應
+  const SUIT_COLOR = {
+    S: '#69c0ff', // 黑桃
+    H: '#ff7a90', // 紅心
+    D: '#ffb74d', // 方塊
+    C: '#73d13d', // 梅花
+  };
+  const SUIT_SYMBOL = { S: '♠', H: '♥', D: '♦', C: '♣' };
   const tieSet = new Set(['Tie', 'T', '\u548c']);
   const rowsHtml = rounds
     .map((round, index) => {
@@ -167,12 +175,21 @@ function renderRounds(rounds) {
         const suit = cardSuitFromCard(card);
         let classes = 'mono';
         let inline = '';
-        if (signal && !isTie && suit === signal) {
+        let coloredLabel = label;
+        const suitSym = suit ? (SUIT_SYMBOL[suit] || '') : '';
+        // 若是訊號花色，數字與花色都變色
+        if (signal && !isTie && suit === signal && suitSym && label && label.endsWith(suitSym)) {
           classes += ` signal-card signal-card-${signal}`;
           const color = SIGNAL_SUIT_COLOR[signal];
           if (color) inline = ` style="color:${color}"`;
+          // 整個label都染色
+          coloredLabel = `<span style="color:${color}">${label}</span>`;
+        } else if (suit && SUIT_COLOR[suit] && suitSym && label && label.endsWith(suitSym)) {
+          // 只有花色符號變色，數字維持白色
+          const numPart = label.slice(0, label.length - suitSym.length);
+          coloredLabel = `${numPart}<span style="color:${SUIT_COLOR[suit]}">${suitSym}</span>`;
         }
-        cardCells.push(`<td class="${classes}"${inline}>${label}</td>`);
+        cardCells.push(`<td class="${classes}"${inline}>${coloredLabel}</td>`);
       }
       const playerCards = (round.player || round.player_cards || []).join('/') || '';
       const bankerCards = (round.banker || round.banker_cards || []).join('/') || '';
@@ -189,16 +206,28 @@ function renderRounds(rounds) {
         : '';
       const isSIdx = Boolean(round.is_sidx);
       const sIdxOk = Boolean(round.s_idx_ok);
-      const sIdxText = isSIdx ? (sIdxOk ? '\u2665' : '\u2716') : '';
-      const sIdxClass = isSIdx ? (sIdxOk ? 'sidx-ok' : 'sidx-bad') : '';
+      // S_idx 欄顯示訊號花色符號，顏色隨 signal 變
+      let sIdxText = '';
+      let sIdxClass = '';
+      if (isSIdx) {
+        if (sIdxOk) {
+          const sym = SUIT_SYMBOL[signal] || '♥';
+          const color = SUIT_COLOR[signal] || '#ff7a90';
+          sIdxText = `<span style="color:${color};font-weight:700">${sym}</span>`;
+          sIdxClass = 'sidx-ok';
+        } else {
+          sIdxText = '&#10006;';
+          sIdxClass = 'sidx-bad';
+        }
+      }
       const indexLabel = round.is_tail ? '\u5c3e\u5c40' : index + 1;
       const rowClass = round.is_tail ? 'tail-row' : '';
       return `
         <tr class="${rowClass}">
           <td>${indexLabel}</td>
           ${cardCells.join('')}
-          <td class="mono ${sIdxClass}">${sIdxText}</td>
           <td class="${winnerClass}">${result}</td>
+          <td class="mono ${sIdxClass}">${sIdxText}</td>
           <td class="mono">${playerCards}</td>
           <td class="mono">${bankerCards}</td>
           <td>${round.player_point ?? ''}</td>
@@ -320,11 +349,10 @@ function openPreviewWindow(immediatePrint = false) {
         .join(''),
     )
     .join('');
-  const html = `<!doctype html>
+const html = `<!doctype html>
 <html lang="zh-Hant">
   <head>
     <meta charset="utf-8" />
-    <title>\u724c\u9774\u9810\u89bd</title>
     <style>
       /* === 基本版面設定（整體背景、字體大小）=== */
       body{margin:0;padding:24px;background:#0f111a;color:#eef3ff;font:14px/1.4 "Noto Sans TC",sans-serif;}
@@ -333,22 +361,58 @@ function openPreviewWindow(immediatePrint = false) {
       .actions{margin-bottom:12px;display:flex;gap:8px;}
       .actions button{padding:6px 12px;border:1px solid #24324a;border-radius:6px;background:#1d4ed8;color:#f3f8ff;cursor:pointer;}
       /* === 表格外觀（外框、間距、字體大小）=== */
-      .deck-wrapper{display:inline-block;border:1px solid #394968;background:#121b2c;padding:8px;border-radius:8px;}
-      table.deck{border-collapse:collapse;}
-      table.deck td{width:38px;height:24px;text-align:center;font-weight:600;border:1px solid #2a3650;color:#d8e6ff;font-size:14px;padding:2px;}
+      .deck-wrapper{ /* 表格外框容器 */
+        display:block; /* 讓外框可水平置中 */
+        margin:0 auto; /* 水平置中 */
+        border:1px solid #394968; /* 外框顏色 */
+        background:#121b2c; /* 外框背景色 */
+        padding:8px; /* 外框內距 */
+        border-radius:8px; /* 圓角 */
+        width:1000px; /* 表格寬度（可調整） */
+        max-width:100vw;
+      }
+      table.deck{border-collapse:collapse;width:100%;} /* 讓表格寬度填滿外框 */
+      table.deck td{ /* 單一格子 */
+        width:36px; /* 格子寬度（可調整） */
+        height:36px; /* 格子高度（可調整） */
+        text-align:center; /* 文字置中 */
+        font-weight:600; /* 字體加粗 */
+        border:1px solid #2a3650; /* 格子邊框顏色 */
+        color:#d8e6ff; /* 字體顏色（可調整） */
+        font-size:24px; /* 字體大小（可調整） */
+        font-family: auto; /* 字體（可調整） */
+      }
       /* === 顏色設定（可自行調整）=== */
-      table.deck td.card-red{background:#2d1b22;color:#ffd6dc;}
-      table.deck td.card-blue{background:#162437;color:#d7e9ff;}
+      table.deck td.card-red{background: #2d1b22;color: #ffd6dc;}
+      table.deck td.card-blue{background: #162437;color: #d7e9ff;}
       table.deck td.signal-match{box-shadow:inset 0 0 0 2px #ffd591;}
       /* === 列印模式專用樣式 === */
       @media print{
-        body{padding:8px;background:#fff;color:#000;}
-        .actions{display:none !important;}
-        .deck-wrapper{border:1px solid #666;background:#fff;padding:0;border-radius:0;}
-        table.deck td{border:1px solid #888;color:#111;font-size:12px;padding:1px;}
-        table.deck td.card-red{background:#ff4d4f !important;color:#fff !important;}
-        table.deck td.card-blue{background:#2f54eb !important;color:#fff !important;}
-        table.deck td.signal-match{box-shadow:inset 0 0 0 2px #faad14 !important;}
+        body{padding:8px;background:#fff;color:#000;} /* 列印時頁面背景與字色 */
+        .actions{display:none !important;} /* 列印時隱藏操作按鈕 */
+        title, h1, h2, h3, .title, .subtitle, .deck-title {display:none !important;} /* 列印時隱藏標題 */
+        .deck-wrapper{
+          border:2px solid #0e0e0eff; /* 列印時外框顏色 */
+          background:#fff; /* 列印時外框背景色 */
+          padding:0;
+          border-radius:0;
+          width:1200px !important; /* 列印時表格寬度（可調整） */
+          max-width:100vw;
+          margin:0 auto;
+        }
+        table.deck{width:100%;} /* 列印時表格寬度填滿外框 */
+        table.deck td{
+          border:1px solid #000000; /* 列印時格子邊框顏色 */
+          color:#000000; /* 列印時字體顏色 */
+          font-size:26x; /* 列印時字體大小（可調整） */
+          font-family:font-family: auto;
+          padding:0px;
+          width:36px; /* 列印時格子寬度（可調整） */
+          height:36px; /* 列印時格子高度（可調整） */
+        }
+        table.deck td.card-red{background: #f5c5c5ff !important;color:#000000 !important;} /* 紅色格子背景與字色 */
+        table.deck td.card-blue{background: #c2bebeff !important;color:#000000 !important;} /* 藍色格子背景與字色 */
+        table.deck td.signal-match{box-shadow:inset 0 0 0 2px #c20000ff !important; color: #c20000ff !important;} /* 黃色框線，並設定字體顏色 */
       }
     </style>
   </head>
@@ -373,6 +437,7 @@ function openPreviewWindow(immediatePrint = false) {
     </div>
   </body>
 </html>`;
+
   const blob = new Blob([html], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
   const win = window.open(url, '_blank');

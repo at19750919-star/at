@@ -1,82 +1,256 @@
-:root{--bg:#0e1117;--panel:#151a22;--soft:#1b2332;--muted:#9fb0c3;--text:#e6eef8;--brand:#5b9cff;--ok:#4ad395;--warn:#ffb65b;--bad:#ff6b7a;--ring:#2a82ff55;--card-r:18px;--gap:16px;--shadow:0 10px 24px rgba(0,0,0,.45)}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial}
-.container{max-width:100vw;margin:0 auto;padding:0}
-.header{position:sticky;top:0;background:#0e1117d9;backdrop-filter:blur(8px);border-bottom:1px solid #ffffff0f;z-index:50}
-.header .container{display:flex;gap:10px;align-items:center;padding:12px 16px;justify-content:flex-end}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px}
-/* === 頂部卡片 (card-gen / card-sim / card-stats) 排版 === */
-.grid-top{
-  grid-template-columns:repeat(3,minmax(260px,1fr)); /* 頂部三張卡片寬度，minmax(最小寬度, 伸縮比例) */
-} /* 如需調整比例，可改寫這裡的 minmax 設定，或針對個別卡片設定 flex */
-@media (max-width:1200px){.grid{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:780px){.grid{grid-template-columns:1fr}}
-/* === 卡片通用樣式 === */
-.card{background:var(--panel);border:1px solid #ffffff12;border-radius:var(--card-r);box-shadow:var(--shadow);margin:0; /* 可調整卡片上下邊距 */ }
-.card h3{margin:0 0 8px;font-size:16px}
-.card .head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #ffffff12;background:linear-gradient(180deg,#171e2a,#151a22)}
-.card .body{padding:14px 16px}
-/* --- 卡片：產牌設定 (#card-gen) --- */
-/* 需要針對 card-gen 調整樣式時，請於此區塊新增規則 */
-/* --- 卡片：模擬操作 (#card-sim) --- */
-/* 需要針對 card-sim 調整樣式時，請於此區塊新增規則 */
-/* --- 卡片：統計與匯出 (#card-stats) --- */
-.grid-top #card-stats .head{flex-wrap:nowrap;gap:12px}
-.grid-top #card-stats .head .small{white-space:nowrap}
+/* 範圍：全域 CSS 變數 */
+:root {
+  --bg: #182237;      /* 主背景色 */
+  --panel: #1c2535;   /* 卡片面板色 */
+  --soft: #1b2332;    /* 較柔和區塊色 */
+  --muted: #9fb0c3;   /* 淡色文字 */
+  --text: #e6eef8;    /* 主文字色 */
+  --brand: #5b9cff;   /* 品牌主色 */
+  --ok: #4ad395;      /* 成功提示色 */
+  --warn: #ffb65b;    /* 警告提示色 */
+  --bad: #ff6b7a;     /* 錯誤提示色 */
+  --ring: #2a82ff55;  /* 外框聚焦色 */
+  --card-r: 18px;     /* 卡片圓角 */
+  --gap: 16px;        /* 主間距 */
+  --shadow: 0 10px 24px rgba(0,0,0,.45); /* 主陰影 */
+} /* 功能：定義全站的主題色彩、半徑與陰影 */
+
+/* 範圍：所有元素 */
+*{box-sizing:border-box} /* 功能：統一盒模型的寬高計算 */
+
+/* 範圍：html, body */
+html,body{height:100%} /* 功能：確保頁面高度填滿視窗 */
+
+/* 範圍：body */
+body{margin:0;background:var(--bg);color:var(--text);font:18px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial} /* 功能：設定整體背景、字色與基本字體 */
+
+/* 範圍：主要內容容器 */
+.container{width:100vw;margin:0;padding:0} /* 讓主要內容隨螢幕寬度縮放 */
+
+/* 範圍：頁首 .header */
+.header{position:sticky;top:0;background:#0e1117d9;backdrop-filter:blur(8px);border-bottom:1px solid #ffffff0f;z-index:50} /* 功能：建立固定頂端的半透明導覽列 */
+
+/* 範圍：頁首內部容器 */
+.header .container{display:flex;gap:10px;align-items:center;padding:12px 16px;justify-content:flex-end} /* 功能：安排導覽列元素的排列順序與間距 */
+
+/* 範圍：主內容網格 */
+.grid {
+  display: grid;
+  gap: 28px;
+  padding: 10px;
+} /* 功能：建立主體網格布局 */
+
+/* 範圍：.grid-top */
+.grid-top {
+  grid-template-columns: auto auto 1fr;
+} /* 功能：讓前兩張卡片自動收縮，第三張卡片填滿剩餘空間 */
+
+/* 修正網格項目壓縮問題 */
+.grid-top > .card {
+  min-width: 0;
+}
+
+
+/* 範圍：寬度 <= 1200px 的版面 */
+@media (max-width:1200px){.grid{grid-template-columns:repeat(2,1fr)}} /* 功能：將主網格縮減為兩欄 */
+
+/* 範圍：寬度 <= 780px 的版面 */
+@media (max-width:780px){.grid{grid-template-columns:1fr}} /* 功能：在小螢幕改為單欄堆疊 */
+
+/* 範圍：共用卡片容器 */
+.card{background:var(--panel);border:1px solid #ffffff12;border-radius:var(--card-r);box-shadow:var(--shadow);margin:0} /* 功能：設定卡片的背景、邊框與陰影 */
+
+/* 範圍：卡片標題 */
+.card h3{margin:0 0 8px;font-size:16px} /* 功能：調整卡片標題的間距與字級 */
+
+/* 範圍：卡片標題列 */
+.card .head {display: none; /* 直接隱藏所有卡片的標題列 */}
+
+/* 範圍：卡片內容區 */
+.card .body{padding:12px 12px} /* 功能：提供卡片內容內距 */
+
+/* 範圍：統計卡片標題列 */
+.grid-top #card-stats .head{flex-wrap:nowrap;gap:12px} /* 功能：確保統計卡片標題維持同一行並保留間距 */
+
+/* 範圍：統計卡片小字註解 */
+.grid-top #card-stats .head .small{white-space:nowrap} /* 功能：避免統計卡片的小字換行 */
+
+
+
+/* 範圍：生成與模擬操作列 */
 #card-gen .actions,
-#card-sim .actions{flex-wrap:nowrap;overflow-x:auto}
-#card-stats .body{display:flex;gap:16px;align-items:flex-end;flex-wrap:nowrap}
-#card-stats .stats{flex:1;display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:8px;min-width:0}
-#card-stats .cut-summary{display:flex;flex-direction:column;gap:4px;min-width:170px}
-#card-stats .actions{margin-top:0 !important;flex:0 0 auto;align-items:flex-end;gap:8px}
-.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-label{font-size:14px;color:var(--muted);text-align:center;font-weight:600}
-.input{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;min-width:0}
-input[type=number]{height:36px;border-radius:10px;border:1px solid #2a3342;background:#0f1520;color:var(--text);padding:0 10px;outline:none;width:80px;text-align:center;font-size:16px}
-select{height:36px;border-radius:10px;border:1px solid #2a3342;background:#0f1520;color:var(--text);padding:0 10px;outline:none;width:120px;text-align:center;font-size:15px}
-button{height:36px;padding:0 18px;border-radius:10px;border:1px solid #2a3342;background:#133b6b;color:#e7f1ff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:600}
-button.primary{background:linear-gradient(180deg,#3278ff,#2a66df);border-color:#235bd3}
-button:disabled{opacity:.6;cursor:not-allowed}
-.table-wrap{border:1px solid #ffffff12;border-radius:14px;overflow:auto;background:#0e1420;margin:0; /* 可調整表格外距 */ }
-.table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
-.table th,.table td{border-bottom:1px solid #ffffff12;padding:6px 8px;text-align:center;white-space:nowrap;font-size:15px}
-.table th{position:sticky;top:0;background:#101624;z-index:1}
-.win-bank{color:#ff7d7d}.win-player{color:#7ddfff}.win-tie{color:#ffd773}
-.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,"Ubuntu Mono",Consolas,monospace}
-.grid-preview{display:grid;grid-template-columns:repeat(16,1fr);gap:0;border:1px solid #ffffff12;border-radius:12px;overflow:hidden;margin:0; /* 可調整預覽網格邊距 */ }
-.cell{display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;background:#0f1a28;border:1px solid #ffffff0d;font-weight:600;color:#d8e6ff}
-.cell.card-red{background:#2d1b22;color:#ffd6dc}
-.cell.card-blue{background:#162437;color:#d7e9ff}
-.cell.signal-match{box-shadow:inset 0 0 0 2px #ffd591}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:8px;min-width:0}
-.stat{background:var(--soft);border:1px solid #ffffff14;border-radius:12px;padding:10px;text-align:center}
-.stat-label{font-size:13px;font-weight:600;margin-bottom:4px}
-.stat-value{font-size:24px;font-weight:700}
-.stat-S{color:#69c0ff}
-.stat-H{color:#ff7a90}
-.stat-D{color:#ffb74d}
-.stat-C{color:#73d13d}
-.cut-summary{margin-top:0;display:flex;flex-direction:column;gap:4px}
-.cut-summary .mono{font-weight:600}
-.toast{position:fixed;right:18px;bottom:18px;padding:10px 12px;border-radius:10px;background:#18263a;border:1px solid #2c4260;box-shadow:var(--shadow);display:none}
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid #2a3342;border-top-color:#5b9cff;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.small{font-size:12px;color:var(--muted)}
-.signal-card{font-weight:700}
-td.signal-card-H{color:#ff7a90 !important}
-td.signal-card-S{color:#69c0ff !important}
-td.signal-card-D{color:#ffb74d !important}
-td.signal-card-C{color:#73d13d !important}
-.color-seq span{display:inline-block}
-.color-seq .color-r{color:#ff7875;font-weight:700}
-.color-seq .color-b{color:#40a9ff;font-weight:700}
-.sidx-ok{color:#ff7a90;font-weight:700}
-.sidx-bad{color:var(--bad);font-weight:700}
-.table tr.tail-row td:first-child{color:#fadb14;font-weight:700}
-.modal{position:fixed;inset:0;background:#0c111b;display:none;z-index:1000}
-.modal.show{display:block}
-.modal .toolbar{position:sticky;top:0;display:flex;justify-content:center;gap:10px;padding:12px;background:#0c111b;border-bottom:1px solid #ffffff12}
-.modal .board{padding:12px}
-.modal .grid-preview{grid-template-columns:repeat(16,1fr)}
-@media print{header,.grid,#toast{display:none}.modal{display:block}.modal .toolbar{display:none}.modal .board{padding:0}}
+#card-sim .actions{flex-wrap:nowrap;overflow-x:auto} /* 功能：允許操作列橫向捲動防止項目換行 */
+
+/* 範圍：統計卡片內容列 */
+#card-stats .body{display:flex;gap:16px;align-items:flex-end;flex-wrap:nowrap} /* 功能：將統計資訊與按鈕橫向排列並底部對齊 */
+
+/* 範圍：統計卡片數據區 */
+#card-stats .stats{flex:1;display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:8px;min-width:0} /* 功能：以四欄網格呈現剩餘花色 */
+
+/* 範圍：統計卡片摘要欄 */
+#card-stats .cut-summary{display:flex;flex-direction:column;gap:4px;min-width:170px} /* 功能：垂直排列切牌摘要資訊 */
+
+/* 範圍：統計卡片按鈕區 */
+#card-stats .actions{margin-top:0 !important;flex:0 0 auto;align-items:flex-end;gap:8px} /* 功能：固定按鈕區在右側並取消上邊距 */
+
+/* 範圍：共用操作列 */
+.actions{display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end} /* gap 增大，讓輸入框與按鈕間距更明顯 */
+
+/* 範圍：表單標籤 */
+label{font-size:16px;color:var(--muted);text-align:center;font-weight:600} /* 功能：統一標籤字體樣式與顏色 */
+
+/* 範圍：輸入欄位容器 */
+.input{display:flex;flex-direction:column;gap:6px;align-items:center;justify-content:center;min-width:0} /* 功能：垂直排列輸入元件並置中 */
+
+/* 範圍：數字輸入框 */
+input[type=number]{height:40px;border-radius:10px;border:1px solid #2a3342;background:#0f1520;color:var(--text);padding:0 10px;outline:none;width:80px;text-align:center;font-size:16px} /* 功能：統一起迴圈數輸入的尺寸與外觀 */
+
+/* 範圍：下拉選單 */
+select{height:40px;border-radius:10px;border:1px solid #2a3342;background:#0f1520;color:var(--text);padding:0 10px;outline:none;width:120px;text-align:center;font-size:15px} /* 功能：維持選單與輸入框一致的深色主題 */
+
+/* 範圍：共用按鈕 */
+button{height:40px;padding:0 18px;border-radius:10px;border:1px solid #2a3342;background:#133b6b;color:#e7f1ff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:15px;font-weight:600} /* 功能：設定按鈕的尺寸、配色與內文置中 */
+
+/* 範圍：主要按鈕 */
+
+
+/* 範圍：停用按鈕 */
+button:disabled{opacity:.6;cursor:not-allowed} /* 功能：降低透明度並停用游標提示 */
+
+/* 範圍：表格外框容器 */
+.table-wrap{border:1px solid #ffffff12;border-radius:14px;overflow:auto;background:#0e1420;margin:0} /* 功能：包覆表格並提供滾動與圓角 */
+
+/* 範圍：資料表格 */
+.table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums} /* 功能：讓表格寬度滿版並使用等寬數字 */
+
+/* 範圍：表格儲存格 */
+.table th,.table td{border-bottom:1px solid #ffffff12;padding:1px 1px;text-align:center;white-space:nowrap;font-size:18px} /* 功能：統一儲存格間距與底線 */
+.table th{padding-top:10px;padding-bottom:10px;} /* 只加大表頭高度 */
+
+/* 範圍：表格表頭 */
+.table th{position:sticky;top:0;background:#101624;z-index:1} /* 功能：固定表頭於滾動時仍可見 */
+
+/* 範圍：勝負狀態標記 */
+.win-bank{color:#ff7d7d}.win-player{color:#7ddfff}.win-tie{color:#ffd773} /* 功能：以顏色區分莊、閒、和 */
+
+/* 範圍：等寬字體區塊 */
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,"Ubuntu Mono",Consolas,monospace} /* 功能：使用等寬字體保持數值對齊 */
+
+/* 範圍：牌靴格線容器 */
+.grid-preview{display:grid;grid-template-columns:repeat(16,1fr);gap:0;border:1px solid #ffffff12;border-radius:12px;overflow:hidden;margin:0;font-size:32px} /* 功能：建立 16 欄的牌靴展示並限制外框，字體加大 */
+
+/* 範圍：牌靴格子 */
+.cell{display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;background:#0f1a28;border:1px solid #ffffff0d;font-weight:600;color:#d8e6ff} /* 功能：控制每張牌格的比例、配色與置中 */
+
+/* 範圍：紅色訊號格 */
+.cell.card-red{background:#2d1b22;color:#ffd6dc} /* 功能：凸顯紅色訊號的背景與字色 */
+
+/* 範圍：藍色訊號格 */
+.cell.card-blue{background:#162437;color:#d7e9ff} /* 功能：凸顯藍色訊號的背景與字色 */
+
+/* 範圍：訊號匹配格 */
+.cell.signal-match{box-shadow:inset 0 0 0 2px #ffd591} /* 功能：以內框標示符合訊號花色的格子 */
+
+/* 範圍：花色統計格 */
+.stats{display:grid;grid-template-columns:repeat(4,minmax(70px,1fr));gap:8px;min-width:0} /* 功能：建立四欄統計網格佈局 */
+
+/* 範圍：單一統計卡 */
+.stat{background:var(--soft);border:1px solid #ffffff14;border-radius:12px;padding:5px;text-align:center} /* 功能：設定統計卡片的底色與圓角 */
+
+/* 範圍：統計標籤 */
+.stat-label{font-size:20px;font-weight:600;margin-bottom:4px} /* 功能：調整花色標籤的字級與粗細，放大花色符號 */
+
+/* 範圍：統計數值 */
+.stat-value{font-size:24px;font-weight:700} /* 功能：放大統計數值強調視覺 */
+
+/* 範圍：黑桃統計 */
+.stat-S{color:#69c0ff} /* 功能：以藍色代表黑桃數值 */
+
+/* 範圍：紅心統計 */
+.stat-H{color:#ff7a90} /* 功能：以粉紅色代表紅心數值 */
+
+/* 範圍：方塊統計 */
+.stat-D{color:#ffb74d} /* 功能：以橘色代表方塊數值 */
+
+/* 範圍：梅花統計 */
+.stat-C{color:#73d13d} /* 功能：以綠色代表梅花數值 */
+
+/* 範圍：切牌摘要欄位 */
+.cut-summary{margin-top:0;display:flex;flex-direction:column;gap:4px} /* 功能：垂直排列切牌摘要內容 */
+
+/* 範圍：切牌摘要等寬字 */
+.cut-summary .mono{font-weight:600} /* 功能：加粗摘要中的等寬字體 */
+
+/* 範圍：提示泡泡 */
+.toast{position:fixed;right:18px;bottom:18px;padding:10px 12px;border-radius:10px;background:#18263a;border:1px solid #2c4260;box-shadow:var(--shadow);display:none} /* 功能：設定右下角提示訊息外觀 */
+
+/* 範圍：載入指示器 */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid #2a3342;border-top-color:#5b9cff;border-radius:50%;animation:spin 1s linear infinite} /* 功能：顯示旋轉的載入動畫 */
+
+/* 範圍：spin 動畫定義 */
+@keyframes spin{to{transform:rotate(360deg)}} /* 功能：定義連續旋轉效果 */
+
+/* 範圍：小字樣式 */
+.small{font-size:12px;color:var(--muted)} /* 功能：統一說明文字的尺寸與顏色 */
+
+/* 範圍：訊號卡片標記 */
+.signal-card{font-weight:700} /* 功能：加粗訊號卡片的文字 */
+
+/* 範圍：紅心訊號格 */
+td.signal-card-H{color:#ff7a90 !important} /* 功能：以粉紅色凸顯紅心訊號 */
+
+/* 範圍：黑桃訊號格 */
+td.signal-card-S{color:#69c0ff !important} /* 功能：以藍色凸顯黑桃訊號 */
+
+/* 範圍：方塊訊號格 */
+td.signal-card-D{color:#ffb74d !important} /* 功能：以橘色凸顯方塊訊號 */
+
+/* 範圍：梅花訊號格 */
+td.signal-card-C{color:#73d13d !important} /* 功能：以綠色凸顯梅花訊號 */
+
+/* 範圍：顏色序列字元 */
+.color-seq span{display:inline-block} /* 功能：保持顏色序列中每個字元對齊 */
+
+/* 範圍：顏色序列 R */
+.color-seq .color-r{color:#ff7875;font-weight:700} /* 功能：以紅色標示 R 字元 */
+
+/* 範圍：顏色序列 B */
+.color-seq .color-b{color:#40a9ff;font-weight:700} /* 功能：以藍色標示 B 字元 */
+
+/* 範圍：S_idx 合格標記 */
+.sidx-ok{color:#ff7a90;font-weight:700} /* 功能：顯示符合 S_idx 條件 */
+
+/* 範圍：S_idx 未達標記 */
+.sidx-bad{color:var(--bad);font-weight:700} /* 功能：顯示未達成 S_idx 條件 */
+
+/* 範圍：尾局標題列 */
+.table tr.tail-row td:first-child{color:#fadb14;font-weight:700} /* 功能：將尾局標題以黃色強調 */
+
+/* 範圍：模態遮罩 */
+.modal{position:fixed;inset:0;background:#0c111b;display:none;z-index:1000} /* 功能：覆蓋全頁作為預覽遮罩 */
+
+/* 範圍：顯示中的模態 */
+.modal.show{display:block} /* 功能：切換模態顯示狀態 */
+
+/* 範圍：模態工具列 */
+.modal .toolbar{position:sticky;top:0;display:flex;justify-content:center;gap:10px;padding:12px;background:#0c111b;border-bottom:1px solid #ffffff12} /* 功能：固定工具列並置中按鈕 */
+
+/* 範圍：模態內容主體 */
+.modal .board{padding:12px} /* 功能：提供預覽主體的內距 */
+
+/* 範圍：模態內牌靴網格 */
+.modal .grid-preview{grid-template-columns:repeat(16,1fr)} /* 功能：在模態中設定 16 欄牌靴 */
+
+/* 範圍：列印輸出 */
+@media print{
+  header,.grid,#toast{display:none}
+  .modal{display:block}
+  .modal .toolbar{display:none}
+  .modal .board{padding:0}
+  .modal h3, .modal .head, .modal .small {display:none !important} /* 隱藏標題與副標題 */
+  .modal .grid-preview{
+    width:1200px !important;
+    max-width:100vw;
+    margin: 0 auto !important;
+  }
+}

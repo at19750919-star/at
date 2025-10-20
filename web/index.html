@@ -20,22 +20,22 @@
               <div class="input"><label>靴數</label><input id="numShoes" type="number" min="1" max="8" value="1"></div>
               <div class="input"><label>訊號色</label>
                 <select id="signalSuit">
-                  <option value="H" selected>紅心 (H)</option>
-                  <option value="S">黑桃 (S)</option>
-                <option value="D">方塊 (D)</option>
-                <option value="C">梅花 (C)</option>
+                  <option value="H" selected> 紅心 </option>
+                  <option value="S">黑桃 </option>
+                  <option value="D">方塊 </option>
+                  <option value="C">梅花 </option>
               </select>
             </div>
-            <div class="input"><label>和局訊號色</label>
+            <div class="input"><label>和局訊號</label>
               <select id="tieSuit">
                 <option value="" selected>關閉</option>
-                <option value="H">紅心 (H)</option>
-                <option value="S">黑桃 (S)</option>
-                <option value="D">方塊 (D)</option>
-                <option value="C">梅花 (C)</option>
+                <option value="H">紅心 </option>
+                <option value="S">黑桃 </option>
+                <option value="D">方塊 </option>
+                <option value="C">梅花 </option>
               </select>
             </div>
-            <button class="primary" id="btnGen"><span id="spinGen" style="display:none" class="spinner"></span> 創建牌靴</button>
+            <button class="primary" id="btnGen"><span id="spinGen" style="display:none" class="spinner"></span> 創建</button>
           </div>
           <div class="small" id="genInfo" style="margin-top:8px;color:#9fb0c3"></div>
         </div>
@@ -46,7 +46,7 @@
         <div class="head"><h3>模擬</h3><div class="small">切牌與掃描</div></div>
         <div class="body">
             <div class="actions">
-              <div class="input"><label>切去張</label><input id="cutPos" type="number" min="0" value="0"></div>
+              <div class="input"><label>張數</label><input id="cutPos" type="number" min="0" value="0"></div>
               <div class="input"><label>莊家點</label><input id="bankerPoint" type="number" min="0" max="9" value="0"></div>
               <div class="input"><label>閒家點</label><input id="playerPoint" type="number" min="0" max="9" value="0"></div>
               <div class="input"><label>已用張</label><input id="usedCards" type="number" min="0" max="6" value="0"></div>
@@ -76,7 +76,7 @@
       <section class="card" style="margin:0">
         <div class="head"><h3>詳細表格</h3><div class="small">生成後顯示結果</div></div>
         <div class="body">
-          <div class="table-wrap" style="max-height:72vh">
+          <div class="table-wrap" style="max-height:85vh">
             <table class="table" id="tbl"><thead id="thead"></thead><tbody id="tbody"></tbody></table>
           </div>
         </div>

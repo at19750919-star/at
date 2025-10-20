@@ -283,10 +283,13 @@ def generate_shoe(req: GenReq):
             if normalized:
                 setattr(waa, "SIGNAL_SUIT", normalized)
         # 和局訊號花色（若演算法支援且有設定值才覆寫）
-        if hasattr(waa, "TIE_SIGNAL_SUIT") and req.tie_signal_suit:
-            normalized_tie = _normalize_suit_input(req.tie_signal_suit)
-            if normalized_tie:
-                setattr(waa, "TIE_SIGNAL_SUIT", normalized_tie)
+        if hasattr(waa, "TIE_SIGNAL_SUIT"):
+            if req.tie_signal_suit:
+                normalized_tie = _normalize_suit_input(req.tie_signal_suit)
+                if normalized_tie:
+                    setattr(waa, "TIE_SIGNAL_SUIT", normalized_tie)
+            else:
+                setattr(waa, "TIE_SIGNAL_SUIT", None)
     except Exception:
         # 即使設定失敗也不中斷主流程
         pass
